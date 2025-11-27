@@ -21,21 +21,32 @@ def cargar_ranking() -> list[dict[str, str | float]]:
     archivo = open(ARCHIVO_RANKING, "r")
 
     for linea in archivo:
-        if linea == "":
+        linea_limpia = linea.strip()
+
+        if linea_limpia == "":
             continue
 
-        valores = linea.split(",")
+        valores = linea_limpia.split(",")
 
-        tiempo = float(valores[0])
-        dibujo = valores[1]
-        jugador = valores[2]
-        largo_jugador = len(jugador)
-        if largo_jugador > 0:
-            ultimo = jugador[largo_jugador - 1]
-            if ord(ultimo) == 10:
-                jugador = jugador[0:largo_jugador - 1]
-        registro = {"tiempo": tiempo, "dibujo": dibujo, "jugador": jugador}
+        if len(valores) < 3:
+            continue
+
+        texto_tiempo = valores[0].strip()
+        if texto_tiempo == "":
+            continue
+
+        tiempo = float(texto_tiempo)
+        dibujo = valores[1].strip()
+        jugador = valores[2].strip()
+
+        registro = {
+            "tiempo": tiempo,
+            "dibujo": dibujo,
+            "jugador": jugador
+        }
+
         ranking.append(registro)
+
     archivo.close()
     return ranking
 
@@ -61,27 +72,20 @@ def guardar_ranking(ranking: list[dict[str, str | float]]) -> None:
 
     archivo.close()
 
-
-def ordenar_ranking_por_tiempo(ranking: list[dict[str, float | str]]) -> None:
-
+def obtener_tiempo_registro(registro):
     """
-    Ordena el ranking de jugadores en forma ascendente según el tiempo.
-
-    Parámetros:
-        ranking (list[dict]): Lista de registros a ordenar.
-
-    Retorna:
-        None: El ranking se modifica en la misma lista (ordenamiento in-place).
+    Funcion pura: recibe un registro y devuelve solo el tiempo.
+    Se usa como funcion 'key' en sorted (programacion funcional).
     """
-    
-    cantidad = len(ranking)
-    for i in range(cantidad - 1):
-        for j in range(0, cantidad - 1 - i):
-            if ranking[j + 1]["tiempo"] < ranking[j]["tiempo"]:
-                auxiliar = ranking[j]
-                ranking[j] = ranking[j + 1]
-                ranking[j + 1] = auxiliar
+    return registro["tiempo"]
 
+def ordenar_ranking_por_tiempo(ranking):
+    """
+    Usa sorted con una funcion como parametro (obtener_tiempo_registro).
+    sorted no modifica la lista original: devuelve una nueva lista ordenada.
+    """
+    ranking_ordenado = sorted(ranking, key=obtener_tiempo_registro)
+    return ranking_ordenado
 
 def agregar_registro_ranking(tiempo: float, nombre_dibujo: str, nombre_jugador: str) -> None:
 
@@ -96,16 +100,17 @@ def agregar_registro_ranking(tiempo: float, nombre_dibujo: str, nombre_jugador: 
     Retorna:
         None
     """
-    
     ranking = cargar_ranking()
 
-    nuevo = {"tiempo": tiempo, 
-            "dibujo": nombre_dibujo,
-            "jugador": nombre_jugador
-            }
+    nuevo = {
+        "tiempo": tiempo,
+        "dibujo": nombre_dibujo,
+        "jugador": nombre_jugador
+    }
 
     ranking.append(nuevo)
-    ordenar_ranking_por_tiempo(ranking)
+
+    ranking = ordenar_ranking_por_tiempo(ranking)
 
     while len(ranking) > 10:
         ranking.pop()

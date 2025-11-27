@@ -15,7 +15,7 @@ pygame.init()
 
 pygame.mixer.init()
 pygame.mixer.music.load("archivos/LA T Y LA M - Pa' la Selección (Video Oficial).mp3")
-pygame.mixer.music.set_volume(0.2)
+pygame.mixer.music.set_volume(0)
 pygame.mixer.music.play(-1)
 
 archivo_ranking = open(ARCHIVO_RANKING, "a")

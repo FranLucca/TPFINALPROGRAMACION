@@ -5,7 +5,7 @@ import time
 
 
 from graficos.config import *
-from generales.ranking_puntajes import cargar_ranking
+from generales.ranking_puntajes import cargar_ranking, ordenar_ranking_por_tiempo
 
 # CARGAR IMAGEN DE FONDO UNA SOLA VEZ
 fondo = pygame.image.load("archivos/escudo afa.jpg")
@@ -300,6 +300,7 @@ def dibujar_pantalla_ranking(pantalla: any) -> None:
     dibujar_texto(pantalla, texto_titulo, x_centrado, 50, 32, AZUL)
 
     ranking = cargar_ranking()
+    ranking = ordenar_ranking_por_tiempo(ranking)
 
     if len(ranking) == 0:
         dibujar_texto(pantalla, "No hay registros todavia.", 260, 150, 24, NEGRO)
