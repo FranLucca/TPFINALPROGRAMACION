@@ -3,17 +3,59 @@
 import pygame
 import time
 
+
 from graficos.config import *
 from generales.ranking_puntajes import cargar_ranking
 
+# CARGAR IMAGEN DE FONDO UNA SOLA VEZ
+fondo = pygame.image.load("archivos/escudo afa.jpg")
+fondo = pygame.transform.scale(fondo, (ANCHO_VENTANA, ALTO_VENTANA))
+
+
 #FUNCION PARA DIBUJAR TEXTO EN PANTALLA
-def dibujar_texto(pantalla, texto, x, y, tamano, color):
+def dibujar_texto(pantalla: any, texto: str, x: int, y: int, tamano: int, color: tuple) -> None:
+    """
+    Dibuja un texto en la pantalla de Pygame.
+
+    Parámetros:
+        pantalla (any): Superficie donde se va a dibujar el texto.
+        texto (str): Cadena de texto a mostrar.
+        x (int): Posición horizontal donde se dibujará el texto.
+        y (int): Posición vertical donde se dibujará el texto.
+        tamano (int): Tamaño de la fuente.
+        color (tuple): Color del texto en formato RGB (R, G, B).
+
+    Retorna:
+        None: La función no devuelve ningún valor, solo dibuja en pantalla.
+    """
     fuente = pygame.font.SysFont("arial", tamano)
     superficie = fuente.render(texto, True, color)
     pantalla.blit(superficie, (x, y))
 
-def pintar_celda(pantalla, x, y, rectangulo, valor_celda, solucion, fila, columna):
-    pygame.draw.rect(pantalla, GRIS_OSCURO, rectangulo, 1)
+
+def pintar_celda(pantalla: any, x: int, y: int, rectangulo: pygame.Rect, 
+                valor_celda: int, solucion: list, fila: int, columna: int) -> None: 
+    """
+    Dibuja una celda del nonograma según su estado y la solución correcta.
+
+    Parámetros:
+        pantalla (any): Superficie donde se dibuja la celda.
+        x (int): Posición horizontal de la celda.
+        y (int): Posición vertical de la celda.
+        rectangulo (pygame.Rect): Rectángulo que representa la celda.
+        valor_celda (int): Estado de la celda:
+                        0 = vacía,
+                        1 = marcada (clic izquierdo),
+                        2 = cruz roja (clic derecho).
+        solucion (list): Matriz con la solución del nonograma (0 o 1).
+        fila (int): Índice de la fila de la celda.
+        columna (int): Índice de la columna de la celda.
+
+    Retorna:
+        None: No devuelve valor, solo dibuja la celda en pantalla.
+    """
+
+    pygame.draw.rect(pantalla, NEGRO, rectangulo, 1)
 
     if valor_celda == 1:
         if solucion[fila][columna] == 1:
@@ -40,7 +82,20 @@ def pintar_celda(pantalla, x, y, rectangulo, valor_celda, solucion, fila, column
                         (x + margen, y + TAM_CELDA - margen), 2)
 
 #MOSTRAR LAS PISTAS DE LAS COLUMNAS
-def mostrar_pistas_columnas(pantalla, pistas_columnas, x_inicio, y_inicio):
+def mostrar_pistas_columnas(pantalla: any, pistas_columnas: list,
+                            x_inicio: int, y_inicio: int) -> None:
+    """
+    Muestra en pantalla las pistas correspondientes a cada columna del nonograma.
+
+    Parámetros:
+        pantalla (any): Superficie donde se dibujarán los textos.
+        pistas_columnas (list): Lista de listas con las pistas numéricas de cada columna.
+        x_inicio (int): Posición horizontal desde donde se empiezan a mostrar las pistas.
+        y_inicio (int): Posición vertical desde donde se empiezan a mostrar las pistas.
+
+    Retorna:
+        None: Dibuja el texto en pantalla sin devolver ningún valor.
+    """
     dibujar_texto(pantalla, "Pistas columnas:", x_inicio, y_inicio - 30, 22, NEGRO)
 
     y = y_inicio
@@ -53,7 +108,22 @@ def mostrar_pistas_columnas(pantalla, pistas_columnas, x_inicio, y_inicio):
         y = y + 25
 
 #MOSTRAR PISTAS DE LAS FILAS
-def mostrar_pistas_filas(pantalla, pistas_filas, x_inicio, y_inicio):
+def mostrar_pistas_filas(pantalla: any, pistas_filas: list,
+                        x_inicio: int, y_inicio: int) -> None:
+    
+    """
+    Muestra en pantalla las pistas correspondientes a cada fila del nonograma.
+
+    Parámetros:
+        pantalla (any): Superficie donde se dibujan los textos.
+        pistas_filas (list): Lista de listas que contiene las pistas numéricas de cada fila.
+        x_inicio (int): Posición horizontal donde comienzan a mostrarse las pistas.
+        y_inicio (int): Posición vertical donde comienzan a mostrarse las pistas.
+
+    Retorna:
+        None: La función no devuelve valores; solo dibuja texto en pantalla.
+    """
+
     dibujar_texto(pantalla, "Pistas filas:", x_inicio, y_inicio - 30, 22, NEGRO)
 
     y = y_inicio
@@ -66,11 +136,38 @@ def mostrar_pistas_filas(pantalla, pistas_filas, x_inicio, y_inicio):
         y = y + 25
 
 #DIBUJAR EL TABLERO
-def dibujar_tablero(pantalla, tablero, solucion, pistas_filas,
-                    pistas_columnas, vidas, nombre_jugador,
-                    nombre_dibujo, tiempo_inicio, mensaje_penalizacion):
+def dibujar_tablero(pantalla: any, tablero: list[list[int]], solucion: list[list[int]], pistas_filas:list[list[int]],
+                    pistas_columnas: list[list[int]], vidas: int, nombre_jugador: str,
+                    nombre_dibujo: str, tiempo_inicio: float, mensaje_penalizacion: str) -> None:
+    """
+    Dibuja en pantalla el tablero completo del nonograma, incluyendo:
+    - título del juego, jugador y nombre del dibujo,
+    - cantidad de vidas,
+    - tiempo transcurrido,
+    - grilla con las celdas pintadas según el estado actual,
+    - pistas de filas y columnas,
+    - mensaje de penalización si corresponde.
 
-    pantalla.fill(CELESTE)
+    Parámetros:
+        pantalla (any): Superficie principal donde se dibuja todo el juego.
+        tablero (list[list[int]]): Matriz con el estado actual del tablero.
+                                0 = celda vacía,
+                                1 = celda marcada,
+                                2 = celda con cruz roja.
+        solucion (list[list[int]]): Matriz con la solución del nonograma (0 o 1).
+        pistas_filas (list[list[int]]): Pistas numéricas correspondientes a cada fila.
+        pistas_columnas (list[list[int]]): Pistas numéricas correspondientes a cada columna.
+        vidas (int): Cantidad de vidas restantes del jugador.
+        nombre_jugador (str): Nombre del jugador actual.
+        nombre_dibujo (str): Nombre identificador del dibujo del nonograma.
+        tiempo_inicio (float): Momento en segundos (time.time()) en el que comenzó la partida.
+        mensaje_penalizacion (str): Mensaje a mostrar cuando hubo una penalización,
+                                    vacío ("") si no se muestra nada.
+
+    Retorna:
+        None: La función no devuelve ningún valor, solo dibuja en la pantalla.
+    """
+    pantalla.blit(fondo, (0, 0))
 
     dibujar_texto(pantalla, "Nonogramas Seleccion Argentina", 20, 20, 32, AZUL)
     dibujar_texto(pantalla, f"Jugador: {nombre_jugador}", 20, 60, 20, NEGRO)
@@ -115,8 +212,24 @@ def dibujar_tablero(pantalla, tablero, solucion, pistas_filas,
         dibujar_texto(pantalla, mensaje_penalizacion, 150, ALTO_VENTANA - 40, 20, ROJO)
 
 #FUNCION PARA DIBUJAR EL MENU
-def dibujar_menu(pantalla, nombre_jugador):
-    pantalla.fill(CELESTE)
+def dibujar_menu(pantalla: any, nombre_jugador: str) -> dict[str, pygame.Rect]:
+    """
+    Dibuja el menú principal del juego Nonograma, incluyendo el título, el
+    nombre del jugador actual y los botones interactivos.
+
+    Parámetros:
+        pantalla (any): Superficie donde se dibujará el menú.
+        nombre_jugador (str): Nombre del jugador actualmente logueado.
+
+    Retorna:
+        dict[str, pygame.Rect]: Diccionario que contiene los rectángulos
+        correspondientes a cada botón del menú:
+            - "jugar"
+            - "ranking"
+            - "registro"
+            - "salir"
+    """
+    pantalla.blit(fondo, (0, 0))
     dibujar_texto(pantalla, "MENU PRINCIPAL NONOGRAMA", 200, 80, 32, AZUL)
     dibujar_texto(pantalla, f"Jugador actual: {nombre_jugador}", 250, 130, 22, NEGRO)
 
@@ -144,7 +257,18 @@ def dibujar_menu(pantalla, nombre_jugador):
     return botones
 
 #FUNCION PARA LA PANTALLA DE REGISTRO
-def dibujar_pantalla_registro(pantalla, texto_actual):
+def dibujar_pantalla_registro(pantalla: any, texto_actual: str) -> None:
+    """
+    Dibuja la pantalla de registro de jugador donde se ingresa el nombre.
+    Muestra un campo de texto, instrucciones y un mensaje para volver al menú.
+
+    Parámetros:
+        pantalla (any): Superficie donde se dibujará la pantalla de registro.
+        texto_actual (str): Texto que el usuario ha ingresado hasta el momento.
+
+    Retorna:
+        None: La función no devuelve valores, solo dibuja los elementos en pantalla.
+    """
     pantalla.fill(CELESTE)
     dibujar_texto(pantalla, "REGISTRO DE JUGADOR", 230, 80, 32, AZUL)
     dibujar_texto(pantalla, "Escribi tu nombre y presiona ENTER:", 180, 160, 24, NEGRO)
@@ -156,7 +280,18 @@ def dibujar_pantalla_registro(pantalla, texto_actual):
     dibujar_texto(pantalla, "ESC para volver al menu sin guardar.", 200, 300, 20, ROJO)
 
 #FUNCION PARA LA PANTALLA DEL RANKING
-def dibujar_pantalla_ranking(pantalla):
+def dibujar_pantalla_ranking(pantalla: any) -> None:
+    """
+    Dibuja la pantalla del ranking de jugadores, mostrando el top 10 de partidas
+    registradas, incluyendo posición, tiempo, dibujo resuelto y nombre del jugador.
+
+    Parámetros:
+        pantalla (any): Superficie donde se renderiza toda la pantalla
+                                del ranking.
+
+    Retorna:
+        None: La función no devuelve ningún valor; solo dibuja elementos visuales.
+    """
     pantalla.fill(CELESTE)
 
     texto_titulo = "RANKING DE JUGADORES"
@@ -205,7 +340,20 @@ def dibujar_pantalla_ranking(pantalla):
     dibujar_texto(pantalla, "Presiona ESC para volver al menu.", 220, 520, 22, ROJO)
 
 #FUNCION PARA MENSAJES
-def dibujar_pantalla_mensaje(pantalla, titulo, mensaje, color_titulo):
+def dibujar_pantalla_mensaje(pantalla: any, titulo: str, mensaje: str, color_titulo: tuple) -> None:
+    """
+    Dibuja una pantalla de mensaje genérico, utilizada para notificaciones,
+    alertas o indicaciones al jugador.
+
+    Parámetros:
+        pantalla (any): Superficie donde se mostrará el mensaje.
+        titulo (str): Texto principal que se muestra como título del mensaje.
+        mensaje (str): Texto secundario con la información que se desea comunicar.
+        color_titulo (tuple): Color RGB del título (por ejemplo, (255,0,0) para rojo).
+
+    Retorna:
+        None: Solo dibuja los textos en pantalla, sin devolver ningún valor.
+    """
     pantalla.fill(CELESTE)
     dibujar_texto(pantalla, titulo, 250, 200, 36, color_titulo)
     dibujar_texto(pantalla, mensaje, 160, 260, 26, NEGRO)

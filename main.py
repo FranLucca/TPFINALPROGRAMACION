@@ -8,10 +8,15 @@ from generales.validaciones import validar_correcto, validar_incorrecto
 from generales.nonogramas import inicializar_matriz, calcular_pistas_filas, calcular_pistas_columnas
 from generales.manejo_archivos import cargar_csv_a_matriz, elegir_nonograma_aleatorio
 from generales.ranking_puntajes import agregar_registro_ranking
-from generales.dibujo_nono import (dibujar_tablero, dibujar_menu, dibujar_pantalla_registro, dibujar_pantalla_ranking, dibujar_pantalla_mensaje)
+from generales.dibujo_nono import dibujar_tablero, dibujar_menu, dibujar_pantalla_registro, dibujar_pantalla_ranking, dibujar_pantalla_mensaje
 
 #PYGAME FUNCIONES FUNDAMENTALES
 pygame.init()
+
+pygame.mixer.init()
+pygame.mixer.music.load("archivos/LA T Y LA M - Pa' la Selección (Video Oficial).mp3")
+pygame.mixer.music.set_volume(0.2)
+pygame.mixer.music.play(-1)
 
 archivo_ranking = open(ARCHIVO_RANKING, "a")
 archivo_ranking.close()
@@ -214,10 +219,10 @@ while ejecutando:
     
     elif estado == "ganador":
         mensaje_ganador = f"Completaste el nonograma en {round(tiempo_final, 2)} segundos."
-        dibujar_pantalla_mensaje(pantalla, "¡GANASTE!", mensaje_ganador, VERDE)
+        dibujar_pantalla_mensaje(pantalla, "¡GANASTE!", mensaje_ganador, AZUL)
         #CONFIGURACION IMAGEN GANADOR
-        x_imagen = ANCHO_VENTANA - ancho_imagen_ganador - 20
-        y_imagen = ALTO_VENTANA - alto_imagen_ganador - 20
+        x_imagen = ANCHO_VENTANA - ancho_imagen_ganador
+        y_imagen = ALTO_VENTANA - alto_imagen_ganador
         pantalla.blit(imagen_ganador, (x_imagen, y_imagen))
 
     pygame.display.flip()
