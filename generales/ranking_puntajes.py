@@ -105,7 +105,6 @@ def ordenar_ranking_por_tiempo(ranking: list[dict]) -> list[dict]:
     ranking_ordenado = sorted(ranking, key=obtener_tiempo_registro)
     return ranking_ordenado
 
-
 def agregar_registro_ranking(tiempo: float, nombre_dibujo: str, nombre_jugador: str) -> None:
 
     """
